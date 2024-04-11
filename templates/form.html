@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <form action="/stock_chart" method="post">
+            <label for="symbol">Stock Symbol:</label>
+            <input type="text" id="symbol" name="symbol" value="AAPL"><br><br>
+            <label for="period">Select period:</label>
+            <select id="period" name="period">
+                <option value="1mo">1 Month</option>
+                <option value="3mo">3 Months</option>
+                <option value="6mo">6 Months</option>
+                <option value="1y">1 Year</option>
+            </select><br><br>
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>
