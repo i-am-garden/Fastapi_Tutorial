@@ -1,2 +1,9 @@
 fastapi
 uvicorn[standard]
+pydantic[email]
+python-multipart
+swagger-ui
+python-jose[cryptography]
+passlib[bcrypt]
+python-jose
+SQLAlchemy

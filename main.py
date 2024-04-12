@@ -3,7 +3,8 @@ from enum import Enum
 from typing import Optional
 from pydantic import BaseModel
 
-app = FastAPI(description="This is a test FastAPI application", version="0.1.0")
+app = FastAPI(description="Fast API Tutorial : Part 1~6", version="0.1.0")
+
 
 @app.get("/")
 async def root():
