@@ -60,6 +60,7 @@
     - [5. `schemas.py`](#5-schemaspy)
     - [6. `main.py`](#6-mainpy)
     - [참조 관계 다이어그램](#참조-관계-다이어그램)
+- [Router](#router)
 
 
 # Setting
@@ -1312,3 +1313,40 @@ schemas.py
 - `database.py`는 애플리케이션의 데이터베이스 연결과 세션 관리를 책임집니다.
 
 이러한 구조를 통해 각 파일은 자신의 역할에 집중하며, 다른 부분의 변경이 이 부분에 미치는 영향을 최소화하여 애플리케이션의 유지 보수성을 향상시킵니다.
+
+# Router
+FastAPI에서는 `APIRouter`를 사용하여 API 엔드포인트를 그룹화하고 관리할 수 있습니다. `APIRouter`를 사용하면 코드를 모듈화하고 관리하기 쉽게 만들어줍니다.
+
+`APIRouter`를 사용하면 다음과 같은 장점이 있습니다:
+
+1. **라우터 그룹화**: `APIRouter`를 사용하여 여러 개의 관련된 엔드포인트를 그룹화할 수 있습니다. 이는 코드를 구조화하고 유지보수를 쉽게 만들어줍니다.
+
+2. **중첩된 라우터**: FastAPI에서는 라우터를 중첩하여 사용할 수 있습니다. 즉, 라우터 내에서 다른 라우터를 정의할 수 있습니다. 이를 통해 복잡한 API를 간단한 구조로 나눌 수 있습니다.
+
+3. **의존성 주입**: 각 라우터에는 해당 라우터에 종속적인 의존성을 쉽게 주입할 수 있습니다. 이는 인증, 데이터베이스 연결 등의 공통 기능을 재사용하는 데 유용합니다.
+
+`APIRouter`를 사용하여 FastAPI 애플리케이션을 구성하는 예시는 다음과 같습니다:
+
+```python
+from fastapi import FastAPI, APIRouter
+
+# FastAPI 애플리케이션 생성
+app = FastAPI()
+
+# APIRouter 인스턴스 생성
+router = APIRouter()
+
+# 라우터에 엔드포인트 추가
+@router.get("/")
+async def read_root():
+    return {"message": "Hello, World"}
+
+@router.get("/items/")
+async def read_items():
+    return {"message": "Read all items"}
+
+# 애플리케이션에 라우터 추가
+app.include_router(router)
+```
+
+위의 코드에서 `/` 경로에 대한 요청은 `read_root` 함수가 처리하고, `/items/` 경로에 대한 요청은 `read_items` 함수가 처리합니다. 이렇게 라우터를 사용하면 코드를 모듈화하고 API 엔드포인트를 관리하기가 더욱 쉬워집니다.
