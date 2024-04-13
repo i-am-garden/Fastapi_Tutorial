@@ -47,6 +47,19 @@
 - [Middleware](#middleware)
   - [여러개의 MiddleWare다루기](#여러개의-middleware다루기)
 - [Database(SQL)](#databasesql)
+  - [DB와 OOP(Objective-Oriented-Programming)그리고 ORM](#db와-oopobjective-oriented-programming그리고-orm)
+    - [데이터베이스와 객체의 차이](#데이터베이스와-객체의-차이)
+    - [ORM의 역할](#orm의-역할)
+      - [구체적인 예시](#구체적인-예시)
+    - [참고자료](#참고자료)
+  - [SQL Python Package 만들기](#sql-python-package-만들기)
+    - [1. `__init__.py`](#1-__init__py)
+    - [2. `crud.py`](#2-crudpy)
+    - [3. `database.py`](#3-databasepy)
+    - [4. `models.py`](#4-modelspy)
+    - [5. `schemas.py`](#5-schemaspy)
+    - [6. `main.py`](#6-mainpy)
+    - [참조 관계 다이어그램](#참조-관계-다이어그램)
 
 
 # Setting
@@ -1077,3 +1090,225 @@ async def read_root():
 
 
 # Database(SQL)
+상상해보세요, 우리는 엄청나게 많은 장난감을 가지고 있고, 이 모든 장난감을 우리 방 어딘가에 정리해두고 싶어요. 그래서 우리는 큰 장난감 상자를 가지고 있고, 각각의 장난감 상자에는 다른 종류의 장난감이 들어 있습니다. 예를 들어, 하나의 상자에는 자동차 장난감들이, 다른 하나에는 인형들이, 또 다른 하나에는 레고 블록들이 들어 있죠.
+
+이제, 우리가 원하는 장난감을 찾으려고 할 때, 모든 장난감을 바닥에 흩뿌려놓고 찾는 대신, 각 상자를 보고 원하는 종류의 장난감을 쉽게 찾을 수 있어요. 이것이 바로 데이터베이스가 하는 일이에요. 데이터베이스는 정보(장난감)를 잘 정리하고 저장하는 곳이며, 우리가 필요할 때 그 정보를 쉽게 찾을 수 있게 해줍니다.
+
+SQL(에스큐엘)은 데이터베이스와 대화하는 방법입니다. 마치 각 상자에 무엇이 들어 있는지 물어보거나, 특정 종류의 장난감을 모두 보여달라고 요청하는 것과 같아요. 예를 들어, "모든 레고 블록을 보여줘" 라고 말하는 것처럼요.
+
+이제 FastAPI와 SQLAlchemy의 역할을 알아볼까요?
+
+FastAPI는 우리가 데이터베이스(장난감 상자)와 어떻게 대화할지 결정하는 프로그램입니다. 우리가 인터넷을 통해 "나는 레고 블록을 보고 싶어"라고 말하면, FastAPI가 그 요청을 받아서 SQL 언어로 번역합니다. 그리고 그 요청을 데이터베이스에 보내죠.
+
+SQLAlchemy는 FastAPI와 데이터베이스 사이에서 도와주는 통역사 역할을 합니다. 우리가 FastAPI를 사용해서 데이터베이스에 무언가를 요청할 때, SQLAlchemy가 그 요청을 데이터베이스가 이해할 수 있는 SQL 언어로 번역해줍니다. 그리고 데이터베이스에서 정보를 가져오면, 그 정보를 우리가 이해할 수 있는 방식으로 다시 번역해줍니다.
+
+결국, FastAPI와 SQLAlchemy를 사용하여 백엔드 서버를 구축하는 것은, 우리가 원하는 정보를 데이터베이스에서 쉽고 빠르게 찾을 수 있게 도와주는 강력한 도구를 만드는 것과 같습니다. 우리가 웹사이트나 앱을 통해 정보를 요청하면, 그 정보를 찾아서 우리에게 다시 보내주죠.
+
+## DB와 OOP(Objective-Oriented-Programming)그리고 ORM
+데이터베이스(DB)와 Python과 같은 프로그래밍 언어에서 사용되는 객체지향 프로그래밍(OOP) 사이에는 몇 가지 근본적인 차이점이 있습니다. 이러한 차이를 이해하는 것은 ORM(Object-Relational Mapping)이 어떻게 두 세계를 연결하는지 이해하는 데 중요합니다.
+
+### 데이터베이스와 객체의 차이
+
+1. **저장 방식**:
+   - **데이터베이스**: 데이터베이스는 데이터를 테이블 형태로 저장합니다. 각 테이블은 여러 개의 열(column)을 가지며, 각 열은 특정 종류의 데이터(예: 문자열, 숫자, 날짜)를 저장합니다. 행(row)은 이러한 열의 구체적인 값을 담고 있어, 데이터의 실제 인스턴스를 나타냅니다.
+   - **객체**: 객체지향 프로그래밍에서 객체는 속성(attribute)과 메소드(method)를 포함합니다. 속성은 객체의 상태를 나타내며, 메소드는 객체가 수행할 수 있는 동작을 정의합니다. 객체는 클래스로부터 생성되며, 클래스는 객체의 '청사진' 역할을 합니다.
+
+2. **관계성**:
+   - **데이터베이스**: 관계형 데이터베이스에서 데이터 간의 관계는 외래 키(foreign keys)를 통해 표현됩니다. 이러한 방식으로 복잡한 데이터 구조와 관계를 모델링할 수 있습니다.
+   - **객체**: 객체 간의 관계는 참조를 통해 표현됩니다. 예를 들어, 한 객체가 다른 객체의 인스턴스를 속성으로 가질 수 있습니다. 이러한 관계는 코드 내에서 직접적으로 표현되며, 객체 간의 상호작용을 정의합니다.
+
+### ORM의 역할
+
+ORM은 데이터베이스의 테이블과 프로그래밍 언어의 객체 사이의 매핑을 제공합니다. 즉, ORM을 사용하면 개발자는 데이터베이스를 직접 조작하는 대신 객체를 통해 간접적으로 데이터베이스와 상호작용할 수 있습니다. 이렇게 함으로써, 개발자는 보다 객체지향적인 방식으로 데이터베이스 로직을 구현할 수 있게 됩니다.
+
+#### 구체적인 예시
+
+예를 들어, 학생(Student)과 학교(School)이라는 두 테이블이 있는 데이터베이스가 있다고 가정해봅시다. 학생 테이블에는 학생의 이름, 학년 등의 정보가 있고, 학교 테이블에는 학교의 이름, 주소 등의 정보가 있습니다. 학생 테이블은 학교 테이블과 연결되어, 각 학생이 어느 학교에 속하는지 나타냅니다.
+
+**데이터베이스 관점에서**:
+- 학생 테이블(School_ID 외래 키를 포함)은 학교 테이블과 관계가 있습니다.
+- 데이터를 쿼리하려면 SQL 문을 작성해야 합니다.
+
+**ORM과 객체지향 프로그래밍 관점에서**:
+- `Student` 클래스와 `School` 클래스가 있으며, `Student` 객체는 `School` 객체를 참조합니다.
+- 개발자는 `Student` 객체를 생성하고 관련 `School` 객체를 할당함으로써, 데이터베이스의 관계를 객체의 관계로 표현할 수 있습니다.
+- ORM은 이 클래스 간의 관계를 데이터베이스 테이블 간의 관계로 변환하고 관리합니다. 이 과정은 코드를 통해 이루어지며, SQL을 직접 작성하는 대신 객체의 메소드를 호출하여 데이터베이스를 조작합니다.
+
+**예시 코드 (Python & SQLAlchemy 사용):**
+
+```python
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+class School(Base):
+    __tablename__ = 'schools'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    students = relationship("Student", backref="school")
+
+class Student(Base):
+    __tablename__ = 'students'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    grade = Column(Integer)
+    school_id = Column(Integer, ForeignKey('schools.id'))
+
+# 데이터베이스 연결 생성
+engine = create_engine('sqlite:///school.db', echo=True)
+Base.metadata.create_all(engine)
+
+# 세션 생성
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# 학교 객체 생성 및 데이터베이스에 추가
+school = School(name="Sunnydale High")
+session.add(school)
+
+# 학생 객체 생성 및 데이터베이스에 추가
+student = Student(name="Buffy Summers", grade=12, school=school)
+session.add(student)
+
+session.commit()
+```
+
+이 코드는 `School`과 `Student` 클래스를 정의하고, 각각 학교와 학생을 나타내는 테이블과 매핑합니다. `School` 클래스에는 `students`라는 관계가 정의되어 있어, 해당 학교에 속한 학생들을 나타냅니다. 반대로, `Student` 클래스는 `school`을 참조하여 학생이 속한 학교를 나타냅니다.
+
+이 관계는 ORM을 통해 다음과 같이 데이터베이스 테이블 간의 관계로 변환됩니다:
+
+| School Table |  | Student Table |
+|--------------|--|---------------|
+| id           | ← | school_id (FK)|
+| name         |  | name          |
+|              |  | grade         |
+
+ORM의 핵심 장점 중 하나는 데이터베이스의 복잡성을 추상화하고, 개발자가 객체지향적인 방식으로 데이터에 접근할 수 있게 한다는 것입니다. 이를 통해 개발자는 데이터베이스 스키마와 SQL 쿼리를 직접 다루는 대신, Python 코드를 통해 데이터를 관리할 수 있습니다. 이러한 접근 방식은 코드의 가독성과 유지보수성을 향상시키며, 객체지향 디자인 원칙을 데이터 관리에 적용할 수 있게 합니다.
+
+### 참고자료
+[ORM이란](https://gmlwjd9405.github.io/2019/02/01/orm.html)
+
+
+## SQL Python Package 만들기
+네, FastAPI와 SQLAlchemy를 사용하여 SQL 애플리케이션을 구현할 때, 여러 파일로 구조를 나누어 관심사를 분리하고 코드의 유지 보수를 용이하게 하는 것이 일반적입니다. 각 파일의 역할과 예상되는 예시 코드를 설명하겠습니다.
+
+### 1. `__init__.py`
+
+- **역할**: 이 파일은 Python에서 패키지의 일부로 디렉토리를 표시하는 데 사용됩니다. `sql_app` 디렉토리가 Python 패키지로 인식되도록 하며, 필요한 경우 패키지 초기화 코드를 포함할 수 있습니다.
+- **예시 코드**: `__init__.py` 파일은 종종 비어 있거나 패키지 수준의 변수를 초기화하는 코드를 포함합니다.
+    ```python
+    # __init__.py
+    ```
+
+### 2. `crud.py`
+
+- **역할**: CRUD는 Create, Read, Update, Delete의 약자로, 데이터베이스와의 상호작용을 담당하는 함수를 정의하는 곳입니다. 이 파일에서는 데이터베이스 레코드에 대한 생성, 조회, 수정, 삭제 로직을 구현합니다.
+- **예시 코드**:
+    ```python
+    # crud.py
+    from sqlalchemy.orm import Session
+    from . import models, schemas
+
+    def get_user(db: Session, user_id: int):
+        return db.query(models.User).filter(models.User.id == user_id).first()
+
+    def create_user(db: Session, user: schemas.UserCreate):
+        db_user = models.User(email=user.email)
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    ```
+
+### 3. `database.py`
+
+- **역할**: 데이터베이스 세션과 연결을 관리합니다. SQLAlchemy 엔진을 설정하고, 데이터베이스와의 세션을 생성 및 관리하는 코드를 포함합니다.
+- **예시 코드**:
+    ```python
+    # database.py
+    from sqlalchemy import create_engine
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+
+    SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    Base = declarative_base()
+    ```
+
+### 4. `models.py`
+
+- **역할**: 데이터베이스 테이블을 Python 클래스로 표현합니다. 각 클래스는 데이터베이스의 테이블과 매핑되며, 테이블의 구조를 정의합니다.
+- **예시 코드**:
+    ```python
+    # models.py
+    from sqlalchemy import Column, Integer, String
+    from .database import Base
+
+    class User(Base):
+        __tablename__ = "users"
+        id = Column(Integer, primary_key=True, index=True)
+        email = Column(String, unique=True, index=True)
+    ```
+
+### 5. `schemas.py`
+
+- **역할**: 이 파일은 데이터 검증 및 직렬화를 위한 Pydantic 모델을 정의합니다. 클라이언트와 서버 간에 교환되는 데이터의 구조와 유형을 정의합니다.
+- **예시 코드**:
+    ```python
+    # schemas.py
+    from pydantic import BaseModel
+
+    class UserBase(BaseModel):
+        email: str
+
+    class UserCreate(UserBase):
+        pass
+
+    class User(UserBase):
+        id: int
+
+        class Config:
+            orm_mode = True
+    ```
+
+### 6. `main.py`
+
+- **역할**: 애플리케이션의 진입점입니다. FastAPI 애플리케이션 인스턴스를 생성하고, 라우트를 정의하며, 애플리케이션을 실행하는 코드를 포함합니다.
+- **예시 코드**:
+    ```python
+    # main.py
+    from fastapi import FastAPI, Depends, HTTPException
+
+애플리케이션의 파일들 간의 참조 관계는 다음과 같이 구성될 수 있습니다. 이 구조는 각 컴포넌트의 역할을 명확히 하고, 코드의 재사용성 및 유지 보수성을 향상시키기 위해 설계된 것입니다.
+
+1. **`main.py`**: 이 파일은 애플리케이션의 진입점이며, FastAPI 인스턴스를 생성하고 라우트를 정의합니다. 여기서는 `crud.py`, `models.py`, `schemas.py` 파일에서 정의된 함수, 모델, 스키마를 사용하여 API 엔드포인트를 구현합니다. 또한, `database.py`에서 세션 관리 기능을 가져와 요청에 대한 데이터베이스 세션을 생성하고 종료합니다.
+
+2. **`crud.py`**: 이 파일은 데이터베이스의 CRUD(Create, Read, Update, Delete) 작업을 수행하는 함수를 포함합니다. `models.py`에서 정의된 SQLAlchemy 모델을 사용하여 데이터베이스 작업을 수행하며, `schemas.py`에서 정의된 Pydantic 스키마를 사용하여 입력 데이터를 검증하고 출력 데이터를 직렬화합니다.
+
+3. **`database.py`**: SQLAlchemy 엔진 및 세션을 설정합니다. 이 파일은 `models.py`에서 데이터베이스 모델을 정의할 때 기본 클래스로 사용되는 `Base` 클래스를 제공합니다. 또한, `main.py`와 `crud.py`에서 데이터베이스 세션을 생성하고 관리하는 데 필요한 세션 팩토리(`SessionLocal`)를 제공합니다.
+
+4. **`models.py`**: 데이터베이스 테이블과 매핑되는 SQLAlchemy 모델을 정의합니다. 이 모델은 `crud.py`에서 데이터베이스 작업을 수행할 때 사용되며, `database.py`에서 제공하는 `Base` 클래스를 상속받습니다.
+
+5. **`schemas.py`**: 데이터 검증 및 직렬화를 위한 Pydantic 모델(스키마)를 정의합니다. 이 스키마는 `crud.py`에서 입력 데이터를 검증하고, 데이터베이스 작업의 결과를 직렬화하는 데 사용됩니다. 또한, `main.py`에서 API 엔드포인트의 요청 및 응답 모델로 사용됩니다.
+
+### 참조 관계 다이어그램
+
+```
+ main.py
+   ↑  ↓
+crud.py → models.py → database.py
+   ↑  ↓
+schemas.py
+```
+
+- `main.py`는 애플리케이션의 로직과 API 엔드포인트를 정의하는 중심적인 역할을 합니다. 따라서, 다른 모듈을 직접 참조하거나 사용됩니다.
+- `crud.py`는 `models.py`와 `schemas.py`의 기능을 사용하여 데이터베이스 작업을 수행합니다.
+- `models.py`는 `database.py`에서 정의된 `Base` 클래스를 상속받아 데이터베이스 스키마를 정의합니다.
+- `schemas.py`는 `crud.py`와 `main.py`에서 사용되어 데이터의 검증 및 직렬화를 담당합니다.
+- `database.py`는 애플리케이션의 데이터베이스 연결과 세션 관리를 책임집니다.
+
+이러한 구조를 통해 각 파일은 자신의 역할에 집중하며, 다른 부분의 변경이 이 부분에 미치는 영향을 최소화하여 애플리케이션의 유지 보수성을 향상시킵니다.
